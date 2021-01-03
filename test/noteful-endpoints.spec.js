@@ -2,6 +2,8 @@ const knex = require('knex');
 const supertest = require('supertest');
 const app = require('../src/app');
 const { makeFoldersArray } = require('./folders-fixtures');
+const { makeNotesArray } = require('./notes-fixtures');
+
 
 describe('Test Folders Endpoints', function() {
     let db
@@ -16,7 +18,7 @@ describe('Test Folders Endpoints', function() {
 
       after('DC from db', () => db.destroy())
       before('clean the table', () => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
-    //   afterEach('cleanup',() => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
+      afterEach('cleanup', () => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
 
     describe(`GET /folders`, () => {
         context('given no folders', () => {
@@ -26,9 +28,9 @@ describe('Test Folders Endpoints', function() {
                     .expect(200, [])
             })
         })
-        context('Given articles in datatabase', ()=> {
+        context('Given folders in datatabase', ()=> {
             const testFolders = makeFoldersArray();
-            beforeEach('insert articles', () => {
+            beforeEach('insert folders', () => {
                 return db
                     .into('noteful_folders')
                     .insert(testFolders)
@@ -36,7 +38,29 @@ describe('Test Folders Endpoints', function() {
             it('responds with 200 and array of folders', () => {
                 return supertest(app)
                     .get('/folders')
-                    .expect(200)
+                    .expect(200, testFolders)
+            })
+        })
+    })
+    describe(`GET /notes`, () => {
+        context('given no notes', () => {
+            it('returns a 200', () => {
+                return supertest(app)
+                    .get('/notes')
+                    .expect(200, [])
+            })
+        })
+        context('Given folders in datatabase', ()=> {
+            const testNotes = makeNotesArray();
+            beforeEach('insert folders', () => {
+                return db
+                    .into('noteful_notes')
+                    .insert(testNotes)
+            })
+            it('responds with 200 and array of notes', () => {
+                return supertest(app)
+                    .get('/notes')
+                    .expect(200, testNotes)
             })
         })
     })

@@ -1,18 +1,19 @@
 function makeFoldersArray() {
     return [
         {
-            folderId: 1,
-            folderName: 'folder1',
+            folder_id: 1,
+            folder_name: 'folder1',
         },
         {
-            folderId: 2,
-            folderName: 'folder2',
+            folder_id: 2,
+            folder_name: 'folder2',
         },
         {
-            folderId: 3,
-            folderName: 'folder3',
+            folder_id: 3,
+            folder_name: 'folder3',
         },
     ]
 }
 
 module.exports = {makeFoldersArray}
+
