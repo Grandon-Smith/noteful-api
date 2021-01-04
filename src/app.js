@@ -29,7 +29,7 @@ app.get('/folders', (req, res, next) => {
     .catch(next)
 })
 
-.get('/notes', (req, res, next) => {
+app.get('/notes', (req, res, next) => {
     const knexInstance = req.app.get('db')
     NotesService.getAllNotes(knexInstance)
     .then(notes => {
@@ -37,6 +37,27 @@ app.get('/folders', (req, res, next) => {
     })
     .catch(next)
 })
+
+app.delete('/folders/:folder_id', (req, res, next) => {
+    FoldersService.deleteFolder(
+        req.app.get('db'),
+        req.params.folder_id
+    )
+    .then(folder => {
+        if(!folder) {
+            return res.status(404).json({
+                error: {message: `Folder does not exist`}
+            })
+        }
+        res.folder = folder
+        next()
+    })
+    .then(numRowsAffected => {
+        res.status(204).end()
+    })
+    .catch(next)
+})
+
 
 app.get('/', (req, res) => {
     res.send('Hello, world!')

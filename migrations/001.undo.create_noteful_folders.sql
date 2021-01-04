@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS noteful_folders CASCADE;
+DROP TABLE IF EXISTS noteful_folders;

@@ -9,6 +9,16 @@ const NotesService = {
           .where('id', id)
           .first()
       },
+    deleteNote(knex, id) {
+        return knex('noteful_notes')
+            .where({ id })
+            .delete()
+    },
+    updateFolder(knex, id, newUserFields) {
+        return knex('noteful_notes')
+          .where({ id })
+          .update(newUserFields)
+      },
 }
 
 module.exports = NotesService

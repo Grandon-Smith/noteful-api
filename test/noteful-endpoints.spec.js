@@ -64,5 +64,34 @@ describe('Test Folders Endpoints', function() {
             })
         })
     })
-
+    describe('DELETE /folders/:id', () => {
+        context(`given no folders`, () => {
+            const folderId = 123;
+            it(`returns a 404`, () => {
+                supertest(app)
+                    .delete(`/folders/${folderId}`)
+                    .expect(404)
+            })
+        })
+        context(`given there are folders`, () => {
+            const testFolders = makeFoldersArray();
+            beforeEach('insert folders', () => {
+                return db
+                    .into('noteful_folders')
+                    .insert(testFolders)
+            })
+            it(`returns folders array and 204`, () => {
+                const idToRemove = 1
+                const expectedFolders = testFolders.filter(folder =>
+                     folder.folder_id !== idToRemove)
+                supertest(app)
+                    .delete(`/folders/${idToRemove}`)
+                    .expect(204)
+                    .then(res =>
+                        supertest(app)
+                            .get(`/folders`)
+                            .expect(expectedFolders))
+            })
+        })
+    })
 })
