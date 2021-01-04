@@ -14,10 +14,14 @@ const NotesService = {
             .where({ id })
             .delete()
     },
-    updateFolder(knex, id, newUserFields) {
-        return knex('noteful_notes')
-          .where({ id })
-          .update(newUserFields)
+    insertNote(knex, newNote) {
+        return knex
+          .insert(newNote)
+          .into('noteful_notes')
+          .returning('*')
+          .then(rows => {
+            return rows[0]
+          })
       },
 }
 

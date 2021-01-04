@@ -14,11 +14,15 @@ const FoldersService = {
             .where({ folder_id })
             .delete()
     },
-    updateFolder(knex, folder_id, newUserFields) {
-        return knex('noteful_folders')
-          .where({ folder_id })
-          .update(newUserFields)
-      },
+    insertFolder(knex, newFolder) {
+        return knex
+          .insert(newFolder)
+          .into('noteful_folders')
+          .returning('*')
+          .then(rows => {
+            return rows[0]
+          })
+    },
 }
 
 module.exports = FoldersService

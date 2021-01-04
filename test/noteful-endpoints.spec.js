@@ -17,8 +17,8 @@ describe('Test Folders Endpoints', function() {
     })
 
       after('DC from db', () => db.destroy())
-      before('clean the table', () => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
-      afterEach('cleanup', () => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
+    //   before('clean the table', () => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
+    //   afterEach('cleanup', () => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
 
     describe(`GET /folders`, () => {
         context('given no folders', () => {
@@ -64,7 +64,7 @@ describe('Test Folders Endpoints', function() {
             })
         })
     })
-    describe('DELETE /folders/:id', () => {
+    describe('DELETE /folders/:folder_id', () => {
         context(`given no folders`, () => {
             const folderId = 123;
             it(`returns a 404`, () => {
@@ -92,6 +92,60 @@ describe('Test Folders Endpoints', function() {
                             .get(`/folders`)
                             .expect(expectedFolders))
             })
+        })
+    })
+    describe('DELETE /notes/:note_id', () => {
+        context(`given no notes`, () => {
+            const noteId = 123;
+            it(`returns a 404`, () => {
+                supertest(app)
+                    .delete(`/notes/${noteId}`)
+                    .expect(404)
+            })
+        })
+        context(`given there are notes`, () => {
+            const testNotes = makeNotesArray();
+            beforeEach('insert notes', () => {
+                return db
+                    .into('noteful_notes')
+                    .insert(testNotes)
+            })
+            it(`returns notes array and 204`, () => {
+                const idToRemove = 1
+                const expectedNotes = testNotes.filter(note =>
+                     note.note_id !== idToRemove)
+                supertest(app)
+                    .delete(`/notes/${idToRemove}`)
+                    .expect(204)
+                    .then(res =>
+                        supertest(app)
+                            .get(`/notes`)
+                            .expect(expectedNotes))
+            })
+        })
+    })
+    describe.only(`POST to /notes`, () => {
+        it(`creates article and responds with 201`, () => {
+            const testNotes = makeNotesArray();
+            const newNote = {
+                id: 4,
+                name: "four",
+                content: "four four",
+                modified: "2029-01-22T16:28:32.615Z",
+                folder_id: 1
+            }
+            return supertest(app)
+                .post(`/notes`)
+                .send(newNote)
+                .expect(201)
+                .expect(res => {
+                    expect(res.body.name).to.eql(newNote.name)
+                })
+                .then(res => 
+                    supertest(app)
+                        .get(`/notes/${res.body.id}`)
+                        .expect(res.body)
+                )
         })
     })
 })
