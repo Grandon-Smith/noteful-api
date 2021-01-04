@@ -5,6 +5,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
 const foldersRouter = require('./folders/folders-router')
+const notesRouter = require('./notes/notes-router')
 const FoldersService = require('./folders/folders-service')
 const NotesService = require('./notes/notes-service')
 const jsonParser = express.json()
@@ -23,6 +24,10 @@ app.use(helmet());
 app.use(cors());
 
 // app.use('/folders', foldersRouter)
+// app.use('/folders/:folder_id', foldersRouter)
+// app.use('/notes', notesRouter)
+// app.use('/notes/:note_id', notesRouter)
+
 app.get('/folders', (req, res, next) => {
     const knexInstance = req.app.get('db')
     FoldersService.getAllFolders(knexInstance)
@@ -39,6 +44,22 @@ app.get('/notes', (req, res, next) => {
         res.json(notes)
     })
     .catch(next)
+})
+app.get('/notes/:note_id', (req, res, next) => {
+    const knexInstance = req.app.get('db')
+    const id = req.params.note_id
+    NotesService.getNoteById(knexInstance, id)
+    .then(note => {
+        if(!note) {
+            return res.status(404).json({
+                error: { message: `Note with id ${id} not found`}
+            })
+        }
+        res.status(200).json(note)
+        next()
+    })
+    .catch(next)
+
 })
 
 app.delete('/folders/:folder_id', (req, res, next) => {
@@ -62,7 +83,7 @@ app.delete('/folders/:folder_id', (req, res, next) => {
 })
 
 app.delete('/notes/:note_id', (req, res, next) => {
-    FoldersService.deleteFolder(
+    NotesService.deleteNote(
         req.app.get('db'),
         req.params.note_id
     )
@@ -83,7 +104,7 @@ app.delete('/notes/:note_id', (req, res, next) => {
 
 app.post(`/notes`, jsonParser, (req, res, next) => {
     const { name, content, modified, folder_id } = req.body;
-    const id = 4
+    const id = Math.floor(Math.random() * 100)
     const newNote = { id, name, content, modified, folder_id }
 
     for (const [key, value] of Object.entries(newNote)) {
@@ -101,8 +122,33 @@ app.post(`/notes`, jsonParser, (req, res, next) => {
     .then(note => {
         res
             .status(201)
-            .location(path.posix.join(req.originalUrl, `/notes/${id}`))
+            .location(path.posix.join('http://localhost:8000', `/notes/${id}`))
             .json(newNote)
+    })
+    .catch(next)
+})
+
+app.post(`/folders`, jsonParser, (req, res, next) => {
+    const { folder_id, folder_name } = req.body;
+    const newFolder = { folder_id, folder_name }
+
+    for (const [key, value] of Object.entries(newFolder)) {
+        if (value == null) {
+            return res.status(400).json({
+                error: { message: `Missing '${key}' in request body` }
+            })
+        }
+    }
+
+    FoldersService.insertFolder(
+        req.app.get('db'),
+        newFolder
+    )
+    .then(folder => {
+        res
+            .status(201)
+            .location(path.posix.join('http://localhost:8000', `/folders/${folder_id}`))
+            .json(newFolder)
     })
     .catch(next)
 })

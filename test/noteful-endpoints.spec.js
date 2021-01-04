@@ -17,8 +17,8 @@ describe('Test Folders Endpoints', function() {
     })
 
       after('DC from db', () => db.destroy())
-    //   before('clean the table', () => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
-    //   afterEach('cleanup', () => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
+      before('clean the table', () => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
+      afterEach('cleanup', () => db.raw('TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE'))
 
     describe(`GET /folders`, () => {
         context('given no folders', () => {
@@ -124,9 +124,8 @@ describe('Test Folders Endpoints', function() {
             })
         })
     })
-    describe.only(`POST to /notes`, () => {
-        it(`creates article and responds with 201`, () => {
-            const testNotes = makeNotesArray();
+    describe(`POST to /notes`, () => {
+        it(`creates note and responds with 201`, () => {
             const newNote = {
                 id: 4,
                 name: "four",
@@ -146,6 +145,21 @@ describe('Test Folders Endpoints', function() {
                         .get(`/notes/${res.body.id}`)
                         .expect(res.body)
                 )
+        })
+    })
+    describe(`POST to /folders`, () => {
+        it(`creates folder and responds with 201`, () => {
+            const newFolder = {
+                folder_id: 6,
+                folder_name: 'six'
+            }
+            return supertest(app)
+                .post(`/folders`)
+                .send(newFolder)
+                .expect(201)
+                .expect(res => {
+                    expect(res.body.folder_name).to.eql(newFolder.folder_name)
+                })
         })
     })
 })
