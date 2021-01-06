@@ -104,7 +104,7 @@ app.delete('/notes/:note_id', (req, res, next) => {
 
 app.post(`/notes`, jsonParser, (req, res, next) => {
     const { name, content, modified, folder_id } = req.body;
-    const id = Math.floor(Math.random() * 100)
+    const id = Math.floor(Math.random() * 1000)
     const newNote = { id, name, content, modified, folder_id }
 
     for (const [key, value] of Object.entries(newNote)) {

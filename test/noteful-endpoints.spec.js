@@ -139,6 +139,7 @@ describe('Test Folders Endpoints', function() {
                 .expect(201)
                 .expect(res => {
                     expect(res.body.name).to.eql(newNote.name)
+                    expect(res.body.content).to.eql(newNote.content)
                 })
                 .then(res => 
                     supertest(app)
